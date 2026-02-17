@@ -1,0 +1,39 @@
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        trie = {}
+        for w in words:
+            node = trie
+            for ch in w:
+                node = node.setdefault(ch, {})
+            node["$"] = w   # store word at end
+
+        res = []
+        m, n = len(board), len(board[0])
+
+        def dfs(i, j, node):
+            ch = board[i][j]
+            if ch not in node:
+                return
+
+            nxt = node[ch]
+            word = nxt.pop("$", None)
+            if word:
+                res.append(word)
+
+            board[i][j] = "#"
+
+            if i > 0: dfs(i - 1, j, nxt)
+            if i < m - 1: dfs(i + 1, j, nxt)
+            if j > 0: dfs(i, j - 1, nxt)
+            if j < n - 1: dfs(i, j + 1, nxt)
+
+            board[i][j] = ch
+
+            if not nxt:
+                node.pop(ch)
+
+        for i in range(m):
+            for j in range(n):
+                dfs(i, j, trie)
+
+        return res
